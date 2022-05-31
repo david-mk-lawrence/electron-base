@@ -131,7 +131,7 @@ export default function AppContainer(): JSX.Element {
                                 </RouteContainer>
                             }
                         />
-                        <Route element={NotFound} />
+                        <Route element={<NotFound />} />
                     </Routes>
                 </Suspense>
             </div>
