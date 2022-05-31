@@ -8,17 +8,24 @@ export interface Extension {
 
 export const REDUX: Extension = {
     id: "lmhkpmbekcpmknklioeibfkpmmfibljd",
-    version: "2.17.0_0",
+    version: "3.0.3_0",
 }
 
 export const REACT: Extension = {
     id: "fmkadmapgofadopljbjfkapdkoienihi",
-    version: "4.10.1_0",
+    version: "4.22.0_0",
 }
 
 export const getOSExtensionDir = (): string => {
     if (process.platform === "darwin") {
-        return "/Library/Application Support/Google/Chrome/Default/Extensions"
+        return path.join(
+            "Library",
+            "Application Support",
+            "Google",
+            "Chrome",
+            "Default",
+            "Extensions",
+        )
     }
 
     throw new Error("Extension loading only supported on MacOS")

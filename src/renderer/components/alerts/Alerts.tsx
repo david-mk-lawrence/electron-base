@@ -15,9 +15,9 @@ export default function Alerts(): JSX.Element {
         return <></>
     }
 
-    const getAlertElement = (alert: AlertObj, key: number): JSX.Element => {
-        return <GenericAlert alert={alert} key={key} />
-    }
+    const getAlertElement = (alert: AlertObj, key: number): JSX.Element => (
+        <GenericAlert alert={alert} key={key} />
+    )
 
     return (
         <div data-testid={TEST_ID_ALERTS_CONTAINER}>

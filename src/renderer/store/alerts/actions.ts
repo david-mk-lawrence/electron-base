@@ -1,5 +1,3 @@
-import { Action } from "redux"
-import { ThunkAction } from "redux-thunk"
 import {
     Alert,
     AlertType,
@@ -8,10 +6,7 @@ import {
     CLEAR_ALERTS,
     CREATE_ALERT,
 } from "./types"
-import { IpcListener } from "@/renderer/lib/ipc"
-import { RootState } from "@/renderer/store/state"
-
-type AlertThunkAction<R> = ThunkAction<R, RootState, never, Action>
+import { IpcListener, ThunkAction } from "@/renderer/store"
 
 export const createAlert = (alert: Alert): CreateAlertAction => ({
     type: CREATE_ALERT,
@@ -27,7 +22,7 @@ export const clearAlert = (alert: Alert): ClearAlertsAction => {
 }
 
 export const clearAlertsByKeys =
-    (keys: string[]): AlertThunkAction<ClearAlertsAction> =>
+    (keys: string[]): ThunkAction<ClearAlertsAction> =>
     (dispatch, getState) => {
         for (const key of keys) {
             const alert = getState().alert.alerts[key]
@@ -40,7 +35,7 @@ export const clearAlertsByKeys =
     }
 
 export const clearAlertByTags =
-    (tags: string[]): AlertThunkAction<ClearAlertsAction> =>
+    (tags: string[]): ThunkAction<ClearAlertsAction> =>
     (dispatch, getState) => {
         const alerts = getState().alert.alerts
         const keys = []
@@ -56,16 +51,14 @@ export const clearAlertByTags =
         return dispatch({ type: CLEAR_ALERTS, payload: keys })
     }
 
-export const receiveAlert: IpcListener = (
-    key: string,
-    type: AlertType,
-    message: string,
-): CreateAlertAction => ({
-    type: CREATE_ALERT,
-    payload: {
-        key,
-        type,
-        message,
-        tags: [],
-    },
-})
+export const receiveAlert: IpcListener<CreateAlertAction> =
+    (key: string, type: AlertType, message: string) => dispatch =>
+        dispatch({
+            type: CREATE_ALERT,
+            payload: {
+                key,
+                type,
+                message,
+                tags: [],
+            },
+        })

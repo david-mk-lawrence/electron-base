@@ -1,15 +1,8 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin")
-const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin")
-const webpack = require("webpack")
 const path = require("path")
-const { spawn } = require("child_process")
-
-const port = 9080
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
 module.exports = {
-    mode: "development",
-    entry: "./src/renderer/index.tsx",
-    target: "web",
+    mode: "production",
     resolve: {
         alias: {
             ["@"]: path.resolve(__dirname, "src"),
@@ -21,12 +14,9 @@ module.exports = {
             {
                 test: /\.ts(x?)$/,
                 include: /src/,
-                exclude: /node_modules/,
+                exclude: /(node_modules|\.webpack)/,
                 use: {
                     loader: "babel-loader",
-                    options: {
-                        cacheDirectory: true,
-                    },
                 },
             },
             {
@@ -77,41 +67,19 @@ module.exports = {
         ],
     },
     plugins: [
-        new HtmlWebpackPlugin({
-            template: "./src/renderer/index.html",
+        new ForkTsCheckerWebpackPlugin({
+            typescript: {
+                diagnosticOptions: {
+                semantic: true,
+                syntactic: true,
+                },
+                mode: "write-references",
+            },
         }),
-        new webpack.HotModuleReplacementPlugin(),
-        new ReactRefreshWebpackPlugin(),
     ],
-    output: {
-        path: path.resolve(__dirname, "dist"),
-        filename: "[name].js",
-        clean: true,
-    },
-    devtool: "source-map",
-    devServer: {
-        contentBase: path.join(__dirname, "dist"),
-        port: port,
-        compress: true,
-        noInfo: false,
-        stats: "errors-only",
-        inline: true,
-        lazy: false,
-        hot: true,
-        watchOptions: {
-            aggregateTimeout: 300,
-            ignored: /node_modules/,
-            poll: 100,
-        },
-        before() {
-            console.log("Starting Main Process...")
-            spawn("npm", ["run", "electron:dev"], {
-                shell: true,
-                env: process.env,
-                stdio: "inherit",
-            })
-                .on("close", code => process.exit(code))
-                .on("error", spawnError => console.error(spawnError))
-        },
-    },
+    performance: {
+        hints: false,
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000
+    }
 }

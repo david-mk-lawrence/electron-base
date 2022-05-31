@@ -1,8 +1,7 @@
 import { AppError, JsonValue, Session, SESSION_SCHEMAS } from "@/common"
 import { schemaValidate, ValidationErrors } from "@/main/validation"
 
-let defaultSession: Session = {
-}
+let defaultSession: Session = {}
 
 interface Sessions {
     [key: number]: Session

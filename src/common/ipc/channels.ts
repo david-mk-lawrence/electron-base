@@ -12,6 +12,10 @@ export const SET_SETTINGS_CHANNEL = "settings:set"
 export const GET_SESSION_CHANNEL = "session:get"
 export const SET_SESSION_CHANNEL = "session:set"
 
+// Secrets
+export const GET_SECRET_CHANNEL = "secret:get"
+export const SET_SECRET_CHANNEL = "secret:set"
+
 export const allowedChannels: string[] = [
     ERRORS_CHANNEL,
     LOGS_CHANNEL,
@@ -20,4 +24,6 @@ export const allowedChannels: string[] = [
     SET_SESSION_CHANNEL,
     GET_SETTINGS_CHANNEL,
     SET_SETTINGS_CHANNEL,
+    GET_SECRET_CHANNEL,
+    SET_SECRET_CHANNEL,
 ]

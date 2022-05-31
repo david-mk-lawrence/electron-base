@@ -1,6 +1,5 @@
 module.exports = {
-    purge: ["./src/renderer/**/*.jsx"],
-    darkMode: "media",
+    content: ["./src/renderer/**/*.{jsx,tsx}"],
     theme: {
         container: {
             center: true,
@@ -40,6 +39,5 @@ module.exports = {
             },
         },
     },
-    variants: {},
     plugins: [require("@tailwindcss/forms")],
 }

@@ -1,7 +1,6 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron"
-import path from "path"
 
-import { init, ipcHandlers } from "@/main/app"
+import { init, ipcHandlers, handleOpenUrl } from "@/main/app"
 import { configureCrashReporter, handleError } from "@/main/errors"
 import { loadExtensions, REACT, REDUX } from "@/main/extensions"
 import { registerIpcHandlers } from "@/main/ipc"
@@ -25,13 +24,9 @@ const createWindow = (
         show: false,
         titleBarStyle: "hiddenInset",
         webPreferences: {
-            devTools: isDev,
-            nodeIntegration: false,
-            nodeIntegrationInWorker: false,
             nodeIntegrationInSubFrames: false,
             contextIsolation: true,
-            enableRemoteModule: false,
-            preload: path.join(__dirname, "preload.js"),
+            preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
             disableBlinkFeatures: "Auxclick",
         },
     })
@@ -39,15 +34,14 @@ const createWindow = (
     win.once("ready-to-show", () => {
         win.show()
         win.focus()
+        if (isDev) {
+            win.webContents.toggleDevTools()
+        }
     })
 
     win.on("closed", onWindowClosed)
 
-    if (isDev) {
-        win.loadURL("http://localhost:9080")
-    } else {
-        win.loadFile("index.html")
-    }
+    win.loadURL(MAIN_WINDOW_WEBPACK_ENTRY)
 
     return win
 }
@@ -77,6 +71,18 @@ const createMenu = (onNewWindow: () => void) => {
                 },
                 { type: "separator" },
                 { role: "close" },
+            ],
+        },
+        {
+            label: "Edit",
+            submenu: [
+                { label: "Undo", accelerator: "CmdOrCtrl+Z", role: "undo" },
+                { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", role: "redo" },
+                { type: "separator" },
+                { label: "Cut", accelerator: "CmdOrCtrl+X", role: "cut" },
+                { label: "Copy", accelerator: "CmdOrCtrl+C", role: "copy" },
+                { label: "Paste", accelerator: "CmdOrCtrl+V", role: "paste" },
+                { label: "Select All", accelerator: "CmdOrCtrl+A", role: "selectAll" },
             ],
         },
         {
@@ -113,16 +119,14 @@ const createMenu = (onNewWindow: () => void) => {
 app.whenReady()
     .then(async () => {
         await init()
-        registerIpcHandlers(ipcHandlers)
-        // registerIpcListeners(ipcListeners)
 
-        // if (isDev) {
-        //     try {
-        //         await loadExtensions([REACT, REDUX])
-        //     } catch (error) {
-        //         console.error("Unable to load extensions: " + error)
-        //     }
-        // }
+        if (isDev) {
+            try {
+                await loadExtensions([REACT, REDUX])
+            } catch (error) {
+                console.error("Unable to load extensions: " + error)
+            }
+        }
 
         const windows = new Set()
 
@@ -148,6 +152,8 @@ app.whenReady()
             return window
         }
 
+        registerIpcHandlers(ipcHandlers)
+
         createAppWindow()
         createMenu(createAppWindow)
 
@@ -158,6 +164,8 @@ app.whenReady()
         })
     })
     .catch(err => handleError(err))
+
+app.on("open-url", handleOpenUrl)
 
 app.on("web-contents-created", (_, contents) => {
     contents.setWindowOpenHandler(() => ({ action: "deny" }))

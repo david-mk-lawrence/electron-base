@@ -9,7 +9,7 @@ interface LocalState {
 export const useKeyboardCombo = (
     actions: KeyboardAction[],
     comboGetter: () => string[],
-) => {
+): string[] => {
     const [localState, setLocalState] = useState<LocalState>({ combo: [] })
 
     useEffect(() => {

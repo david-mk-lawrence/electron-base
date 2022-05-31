@@ -1,10 +1,6 @@
 import { Session, JsonValue, GET_SESSION_CHANNEL, SET_SESSION_CHANNEL } from "@/common"
-import {
-    createIpcInvokeAction,
-    IpcListener,
-    IpcAction,
-    IpcErrorHandler,
-} from "@/renderer/lib/ipc"
+import { createIpcInvokeAction, IpcAction } from "@/renderer/lib/ipc"
+import { IpcListener, IpcErrorHandler } from "@/renderer/store"
 import {
     ReceiveSessionAction,
     SessionErrorAction,
@@ -14,9 +10,9 @@ import {
     CLEAR_SESSION_ERROR,
 } from "./types"
 
-export const receiveSession: IpcListener = (
-    session: Session,
-): ReceiveSessionAction => ({ type: RECEIVE_SESSION, payload: session })
+export const receiveSession: IpcListener<ReceiveSessionAction> =
+    (session: Session) => dispatch =>
+        dispatch({ type: RECEIVE_SESSION, payload: session })
 
 export const getSession = (): IpcAction => createIpcInvokeAction(GET_SESSION_CHANNEL)
 
@@ -32,5 +28,6 @@ export const clearSessionError = (): ClearSessionErrorAction => ({
     type: CLEAR_SESSION_ERROR,
 })
 
-export const handleSessionError: IpcErrorHandler = (error: Error): SessionErrorAction =>
-    createSessionError(error)
+export const handleSessionError: IpcErrorHandler<SessionErrorAction> =
+    (error: Error) => dispatch =>
+        dispatch(createSessionError(error))

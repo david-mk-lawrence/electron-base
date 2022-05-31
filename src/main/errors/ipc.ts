@@ -1,4 +1,4 @@
-import { IpcHandler } from "@/main/ipc"
+import { IpcHandler } from "@/common"
 
 export const handleRendererError: IpcHandler = async (
     _,

@@ -1,5 +1,5 @@
 import { Action } from "redux"
-import { ThunkMiddleware } from "redux-thunk"
+import { ThunkAction, ThunkMiddleware } from "redux-thunk"
 
 import { deserialize } from "@/common"
 
@@ -11,27 +11,27 @@ export interface IpcAction extends Action<string> {
     channel: string
 }
 
-export interface IpcListener<T extends Action = Action> {
-    (...args: any[]): T
+export interface IpcListener<S, T extends Action = Action, R = void> {
+    (...args: any[]): ThunkAction<R, S, undefined, T>
 }
 
-export interface IpcErrorHandler<T extends Action = Action> {
-    (error: Error): T
+export interface IpcErrorHandler<S, T extends Action = Action, R = void> {
+    (error: Error): ThunkAction<R, S, undefined, T>
 }
 
-export type IpcListeners<T extends Action = Action> = Map<
+export type IpcListeners<S, T extends Action = Action, R = void> = Map<
     string,
-    [IpcListener<T>, IpcErrorHandler<T>]
+    [IpcListener<S, T, R>, IpcErrorHandler<S, T, R>]
 >
 
 export const createIpcReceiveThunkMiddleware =
     <S, T extends Action = Action>(
-        listeners: Map<string, IpcListener<T>>,
+        listeners: Map<string, IpcListener<S, T>>,
     ): ThunkMiddleware<S, T> =>
-    ({ dispatch }) => {
+    ({ dispatch, getState }) => {
         listeners.forEach((listener, channel) => {
             window.api.receive(channel, (...args) => {
-                dispatch(listener(...args))
+                listener(...args)(dispatch, getState, undefined)
             })
         })
 
@@ -39,8 +39,10 @@ export const createIpcReceiveThunkMiddleware =
     }
 
 export const createIpcInvokeThunkMiddleware =
-    <S, T extends Action = Action>(listeners: IpcListeners<T>): ThunkMiddleware<S, T> =>
-    ({ dispatch }) =>
+    <S, T extends Action = Action>(
+        listeners: IpcListeners<S, T>,
+    ): ThunkMiddleware<S, T> =>
+    ({ dispatch, getState }) =>
     next =>
     async (action: IpcAction) => {
         if (action.type.startsWith(IPC_INVOKE)) {
@@ -59,9 +61,10 @@ export const createIpcInvokeThunkMiddleware =
                         throw deserialize(result)
                     }
 
-                    dispatch(listener(result))
-                } catch (error) {
-                    dispatch(errorHandler(error))
+                    listener(result)(dispatch, getState, undefined)
+                } catch (error: unknown) {
+                    const err = error as Error
+                    errorHandler(err)(dispatch, getState, undefined)
                 }
             }
 

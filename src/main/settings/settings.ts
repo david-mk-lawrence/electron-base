@@ -21,6 +21,12 @@ const defaultSettings: Settings = {
     appearance: {
         theme: Theme.SYSTEM,
     },
+    advanced: {
+        logging: {
+            enabled: true,
+            level: "error",
+        },
+    },
     keyboard: {
         actions: {
             global: [
@@ -113,9 +119,10 @@ const writeSettings = async (settings: UserSettings): Promise<void> => {
         await writeFileAtomic(getSettingsPath(), JSON.stringify(settings, null, 4), {
             encoding: "utf-8",
         })
-    } catch (error) {
+    } catch (error: unknown) {
+        const err = error as Error
         throw new AppError(
-            `Failed to write ${getSettingsPath()}  to disk. ${error.toString()}`,
+            `Failed to write ${getSettingsPath()}  to disk. ${err.toString()}`,
         )
     }
 }

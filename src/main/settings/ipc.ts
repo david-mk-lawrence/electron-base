@@ -1,6 +1,5 @@
-import { JsonValue, Settings } from "@/common"
+import { JsonValue, Settings, IpcHandler } from "@/common"
 import { init } from "@/main/app"
-import { IpcHandler } from "@/main/ipc"
 import { getSettings, setSetting } from "./settings"
 
 export const handleGetSettings: IpcHandler = async (..._): Promise<Settings> =>

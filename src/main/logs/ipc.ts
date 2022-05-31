@@ -1,5 +1,12 @@
-import { IpcHandler } from "@/main/ipc"
+import { IpcListener, LogLevel } from "@/common"
 
-export const handleRendererLog: IpcHandler = async (_, message: string) => {
-    console.log(`Log from renderer: ${message}`)
+import { getLogger } from "./logger"
+
+export const handleRendererLog: IpcListener = async (
+    _,
+    level: LogLevel,
+    entry: string,
+) => {
+    const logger = await getLogger()
+    logger.log(level, entry)
 }
