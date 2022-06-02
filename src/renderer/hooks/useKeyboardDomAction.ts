@@ -20,7 +20,7 @@ export const useKeyboardDomAction = <T>(
             handle(ref, action)
             dispatch(keyboardActionComplete())
         }
-    }, [ref, action, shouldHandle, handle])
+    }, [ref, action, shouldHandle, handle, dispatch])
 
     return ref
 }

@@ -1,35 +1,17 @@
 import React from "react"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
 
 import { JsonValue } from "@/common"
-import {
-    setSetting,
-    selectSettings,
-    selectSettingsError,
-} from "@/renderer/store/settings"
+import { setSetting } from "@/renderer/store/settings"
+import { AppProps } from "@/renderer/components/types"
 import Appearance from "./settings/Appearance"
+import Advanced from "./settings/Advanced"
 
-export default function Settings(): JSX.Element {
+export type SettingsProps = AppProps
+
+export default function Settings(props: SettingsProps): JSX.Element {
     // Redux state
-    const settings = useSelector(selectSettings)
-    const settingsError = useSelector(selectSettingsError)
     const dispatch = useDispatch()
-
-    if (!settings) {
-        return (
-            <div>
-                <h1>Loading Settings...</h1>
-            </div>
-        )
-    }
-
-    if (settingsError) {
-        return (
-            <div>
-                <h1>Unable to load settings</h1>
-            </div>
-        )
-    }
 
     const onSettingChange = (setting: string, newValue: JsonValue): void => {
         dispatch(setSetting(setting, newValue))
@@ -39,7 +21,10 @@ export default function Settings(): JSX.Element {
         <div>
             <h1>Settings</h1>
 
-            <Appearance onSettingChange={onSettingChange} settings={settings} />
+            <Appearance onSettingChange={onSettingChange} settings={props.settings} />
+            <Advanced onSettingChange={onSettingChange} settings={props.settings} />
+
+            {/* <h1>Secrets</h1> */}
         </div>
     )
 }

@@ -1,81 +1,47 @@
 const path = require("path")
-const CopyPlugin = require("copy-webpack-plugin")
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 
-module.exports = [
-    {
-        // Build Mode
-        mode: "development",
-        // Electron Entrypoint
-        entry: "./src/main/main.ts",
-        target: "electron-main",
-        resolve: {
-            alias: {
-                ["@"]: path.resolve(__dirname, "src"),
-            },
-            extensions: [".tsx", ".ts", ".js"],
+module.exports = {
+    mode: "production",
+    entry: "./src/main/main.ts",
+    resolve: {
+        alias: {
+            ["@"]: path.resolve(__dirname, "src"),
         },
-        module: {
-            rules: [
-                {
-                    test: /\.ts$/,
-                    exclude: /node_modules/,
-                    include: /src/,
-                    use: {
-                        loader: "babel-loader",
-                        options: {
-                            cacheDirectory: true,
-                        },
-                    },
+        extensions: [".tsx", ".ts", ".js"],
+    },
+    module: {
+        rules: [
+            {
+                test: /\.ts$/,
+                exclude: /(node_modules|\.webpack)/,
+                include: /src/,
+                use: {
+                    loader: "babel-loader",
                 },
-            ],
-        },
-        output: {
-            path: __dirname + "/dist",
-            filename: "[name].js",
-            libraryTarget: "commonjs2",
-        },
-        plugins: [
-            new CopyPlugin({
-                patterns: [
-                    {
-                        from: "electron.package.json",
-                        to: "package.json",
-                    },
-                ],
-            }),
+            },
+            {
+                test: /\.node$/,
+                use: {
+                    loader: "node-loader",
+                },
+            },
         ],
     },
-    {
-        // Build Mode
-        mode: "development",
-        // Electron Entrypoint
-        entry: "./src/main/preload.ts",
-        target: "electron-preload",
-        resolve: {
-            alias: {
-                ["@"]: path.resolve(__dirname, "src"),
-            },
-            extensions: [".tsx", ".ts", ".js"],
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.ts$/,
-                    exclude: /node_modules/,
-                    include: /src/,
-                    use: {
-                        loader: "babel-loader",
-                        options: {
-                            cacheDirectory: true,
-                        },
-                    },
+    plugins: [
+        new ForkTsCheckerWebpackPlugin({
+            typescript: {
+                diagnosticOptions: {
+                semantic: true,
+                syntactic: true,
                 },
-            ],
-        },
-        output: {
-            path: __dirname + "/dist",
-            filename: "preload.js",
-            libraryTarget: "commonjs2",
-        },
+                mode: "write-references",
+            },
+        }),
+    ],
+    performance: {
+        hints: false,
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000
     },
-]
+}

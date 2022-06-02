@@ -1,15 +1,13 @@
-import { ipcMain, ipcRenderer, BrowserWindow } from "electron"
+import { ipcMain, BrowserWindow } from "electron"
 import {
     Channel,
     allowedChannels,
     IpcHandler,
-    IpcInvoke,
     IpcInvokeResponse,
     IpcListener,
-    IpcReceive,
-    IpcSend,
     serialize,
 } from "@/common"
+import { getLogger } from "@/main/logs"
 
 export const registerIpcListeners = (listeners: Map<Channel, IpcListener>): void => {
     listeners.forEach((listener, channel) => {
@@ -28,8 +26,11 @@ export const registerIpcHandlers = (handlers: Map<Channel, IpcHandler>): void =>
                         result: await Promise.resolve(handler(...args)),
                         error: false,
                     }
-                } catch (error) {
-                    return { result: serialize(error), error: true }
+                } catch (error: unknown) {
+                    const err = error as Error
+                    const logger = await getLogger()
+                    logger.info(err)
+                    return { result: serialize(err), error: true }
                 }
             })
         }
@@ -41,35 +42,4 @@ export const sendToRenderer = (channel: Channel, ...args: any[]): void => {
     if (window && allowedChannels.includes(channel)) {
         window.webContents.send(channel, ...args)
     }
-}
-
-// Exposed to renderer via context bridge
-export const rendererSend: IpcSend = (channel: Channel, ...args: any[]): void => {
-    if (allowedChannels.includes(channel)) {
-        ipcRenderer.send(channel, ...args)
-    }
-}
-
-export const rendererReceive: IpcReceive = (
-    channel: Channel,
-    listener: (...args: any[]) => void,
-): void => {
-    if (allowedChannels.includes(channel)) {
-        // event is stripped off for renderer
-        ipcRenderer.on(channel, (_, ...args) => listener(...args))
-    }
-}
-
-export const rendererInvoke: IpcInvoke = async (
-    channel: Channel,
-    ...args: any[]
-): Promise<IpcInvokeResponse> => {
-    if (allowedChannels.includes(channel)) {
-        return ipcRenderer.invoke(channel, ...args)
-    }
-
-    return Promise.resolve({
-        error: true,
-        result: serialize(new Error("Invalid Channel")),
-    })
 }

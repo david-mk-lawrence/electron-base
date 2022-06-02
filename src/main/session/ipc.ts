@@ -1,7 +1,6 @@
 import { IpcMainInvokeEvent } from "electron"
 
-import { JsonValue, Session } from "@/common"
-import { IpcHandler } from "@/main/ipc"
+import { JsonValue, Session, IpcHandler } from "@/common"
 import { getSession, setSession } from "./session"
 
 export const handleGetSession: IpcHandler = async (

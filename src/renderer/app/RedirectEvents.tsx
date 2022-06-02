@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 import { isRedirectAction, routeToPath } from "@/common"
 import {
@@ -11,7 +11,7 @@ import {
 export default function RedirectEvents(): JSX.Element {
     const dispatch = useDispatch()
     const keyboardAction = useSelector(selectPendingKeyboardAction)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (keyboardAction && isRedirectAction(keyboardAction)) {
@@ -28,12 +28,12 @@ export default function RedirectEvents(): JSX.Element {
                     go = 1
                 }
 
-                history.go(go)
+                navigate(go)
             } else {
-                history.push(path)
+                navigate(path)
             }
         }
-    }, [keyboardAction, dispatch, history])
+    }, [keyboardAction, dispatch, navigate])
 
     return <></>
 }

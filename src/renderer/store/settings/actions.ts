@@ -4,12 +4,8 @@ import {
     GET_SETTINGS_CHANNEL,
     SET_SETTINGS_CHANNEL,
 } from "@/common"
-import {
-    createIpcInvokeAction,
-    IpcListener,
-    IpcAction,
-    IpcErrorHandler,
-} from "@/renderer/lib/ipc"
+import { createIpcInvokeAction, IpcAction } from "@/renderer/lib/ipc"
+import { IpcListener, IpcErrorHandler } from "@/renderer/store"
 import {
     ReceiveSettingsAction,
     SettingsErrorAction,
@@ -19,9 +15,9 @@ import {
     CLEAR_SETTINGS_ERROR,
 } from "./types"
 
-export const receiveSettings: IpcListener = (
-    settings: Settings,
-): ReceiveSettingsAction => ({ type: RECEIVE_SETTINGS, payload: settings })
+export const receiveSettings: IpcListener<ReceiveSettingsAction> =
+    (settings: Settings) => dispatch =>
+        dispatch({ type: RECEIVE_SETTINGS, payload: settings })
 
 export const getSettings = (): IpcAction => createIpcInvokeAction(GET_SETTINGS_CHANNEL)
 
@@ -37,6 +33,6 @@ export const clearSettingsError = (): ClearSettingsErrorAction => ({
     type: CLEAR_SETTINGS_ERROR,
 })
 
-export const handleSettingsError: IpcErrorHandler = (
-    error: Error,
-): SettingsErrorAction => createSettingsError(error)
+export const handleSettingsError: IpcErrorHandler<SettingsErrorAction> =
+    (error: Error) => dispatch =>
+        dispatch(createSettingsError(error))

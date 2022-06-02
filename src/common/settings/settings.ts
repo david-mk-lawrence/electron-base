@@ -1,5 +1,6 @@
 import { JsonObject } from "@/common/json"
 import { KeyboardContextActions } from "@/common/keyboard"
+import { LogLevel } from "@/common/logging"
 
 export enum Theme {
     SYSTEM = "system",
@@ -20,6 +21,12 @@ export interface Settings extends JsonObject {
     appearance: {
         theme: Theme
     }
+    advanced: {
+        logging: {
+            enabled: boolean
+            level: LogLevel
+        }
+    }
     keyboard: {
         actions: KeyboardContextActions
     }
@@ -27,6 +34,7 @@ export interface Settings extends JsonObject {
 
 export const SETTINGS_KEYS = {
     THEME: "appearance.theme",
+    LOG_LEVEL: "advanced.logging.level",
 }
 
 export const SETTINGS_SCHEMAS = new Map([
@@ -35,6 +43,13 @@ export const SETTINGS_SCHEMAS = new Map([
         {
             type: "string",
             enum: ["system", "light", "dark"],
+        },
+    ],
+    [
+        SETTINGS_KEYS.LOG_LEVEL,
+        {
+            type: "string",
+            enum: ["debug", "info", "warn", "error"],
         },
     ],
 ])
